@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bi-sales": {
+      "command": "npx",
+      "args": ["mcp-remote", "http://localhost:8000/mcp"]
+    }
+
+  }
+}

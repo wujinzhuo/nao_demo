@@ -1,0 +1,80 @@
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: nao_chat_postgres
+        env_file:
+            - .env
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-nao}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nao}
+            POSTGRES_DB: ${POSTGRES_DB:-nao}
+        ports:
+            - '5432:5432'
+        volumes:
+            - /data/nao_postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-nao} -d ${POSTGRES_DB:-nao}']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    nao:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - '${SERVER_PORT:-5005}:${SERVER_PORT:-5005}'
+        environment:
+            # =================================================================
+            # Chat Port
+            # =================================================================
+            SERVER_PORT: ${SERVER_PORT:-5005}
+
+            # =================================================================
+            # Authentication & API Keys
+            # =================================================================
+            BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+            ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+
+            # =================================================================
+            # Langfuse LLM tracing (optional)
+            # =================================================================
+            LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+            LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+            LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-}
+
+            # =================================================================
+            # Database for nao chat history
+            # =================================================================
+            DB_URI: postgres://${POSTGRES_USER:-nao}:${POSTGRES_PASSWORD:-nao}@postgres:5432/${POSTGRES_DB:-nao}
+
+            # =================================================================
+            # Context Configuration
+            # =================================================================
+            # Option A: Local mode (default) - uses bundled example or volume mount
+            NAO_CONTEXT_SOURCE: local
+            NAO_DEFAULT_PROJECT_PATH: /app/example
+
+            # Option B: Git mode - uncomment and configure these instead:
+            # NAO_CONTEXT_SOURCE: git
+            # NAO_CONTEXT_GIT_URL: https://github.com/your-org/your-nao-context.git
+            # NAO_CONTEXT_GIT_BRANCH: main
+            # NAO_CONTEXT_GIT_PLATFORM: github   # override for self-hosted hosts
+            # NAO_CONTEXT_GIT_TOKEN: ${GITHUB_TOKEN}
+            # NAO_DEFAULT_PROJECT_PATH: /app/context
+            # Optional: clone only a subfolder (sparse checkout) — useful for monorepos
+            # NAO_CONTEXT_GIT_SUBPATH: analytics/finance
+            # Option B-bis: SSH deploy key auth (use git@... URL):
+            # NAO_CONTEXT_GIT_URL: git@github.com:your-org/your-nao-context.git
+            # NAO_CONTEXT_GIT_SSH_KEY: ${DEPLOY_KEY}        # raw private key contents
+
+            # Optional: Schedule periodic git pull (cron expression)
+            # NAO_REFRESH_SCHEDULE: "0 * * * *"  # Every hour
+        volumes:
+            - ${NAO_DEFAULT_PROJECT_PATH}:/app/example
+        depends_on:
+            - postgres
+
+volumes:
+    nao_postgres_data:

@@ -1,0 +1,16 @@
+{
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "always"
+	},
+	"eslint.workingDirectories": [{ "mode": "auto" }],
+	"python.defaultInterpreterPath": "${workspaceFolder}/cli/.venv/Scripts/python.exe",
+	"python.analysis.extraPaths": ["${workspaceFolder}/cli"],
+	"python.terminal.activateEnvironment": false,
+	"[python]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "charliermarsh.ruff"
+	},
+	"python-envs.defaultEnvManager": "ms-python.python:system"
+}

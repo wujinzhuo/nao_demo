@@ -1,0 +1,76 @@
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
+import { requestPasswordReset } from '@/lib/auth-client';
+import { AuthForm, FormTextField } from '@/components/auth-form';
+import { useRedirectIfSmtpNotSetup } from '@/hooks/useRedirectIfSmtpNotSetup';
+
+export const Route = createFileRoute('/forgot-password')({
+	component: ForgotPassword,
+});
+
+function ForgotPassword() {
+	const isPending = useRedirectIfSmtpNotSetup();
+	const [submitted, setSubmitted] = useState(false);
+	const [serverError, setServerError] = useState<string | undefined>();
+
+	const form = useForm({
+		defaultValues: { email: '' },
+		onSubmit: async ({ value }) => {
+			setServerError(undefined);
+			const { error } = await requestPasswordReset({
+				email: value.email,
+				redirectTo: `${window.location.origin}/reset-password`,
+			});
+			if (error) {
+				setServerError(error.message);
+			} else {
+				setSubmitted(true);
+			}
+		},
+	});
+
+	if (isPending) {
+		return null;
+	}
+
+	if (submitted) {
+		return (
+			<div className='mx-auto w-full max-w-md p-8 my-auto text-center'>
+				<h1 className='text-2xl font-semibold mb-4'>请查收邮箱</h1>
+				<p className='text-muted-foreground mb-6'>
+					如果该邮箱对应的账号存在，我们已发送一封密码重置邮件。如果没看到，请检查垃圾邮件文件夹。
+				</p>
+				<Link
+					to='/login'
+					search={{ error: undefined, redirect: undefined }}
+					className='text-xs text-foreground font-medium underline underline-offset-2'
+				>
+					返回登录
+				</Link>
+			</div>
+		);
+	}
+
+	return (
+		<AuthForm form={form} title='忘记密码' submitText='发送重置链接' serverError={serverError}>
+			<FormTextField
+				form={form}
+				name='email'
+				type='email'
+				title='邮箱'
+				placeholder='joe@gmail.com'
+				className='mb-2'
+			/>
+			<div className='text-right mb-8'>
+				<Link
+					to='/login'
+					search={{ error: undefined, redirect: undefined }}
+					className='text-xs text-foreground font-medium underline underline-offset-2'
+				>
+					返回登录
+				</Link>
+			</div>
+		</AuthForm>
+	);
+}
