@@ -66,5 +66,22 @@ services:
         depends_on:
             - postgres
 
+    caddy:
+        image: caddy:2-alpine
+        restart: unless-stopped
+        ports:
+            - '80:80'
+            - '443:443'
+        environment:
+            NAO_HOST: ${NAO_HOST}
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile:ro
+            - caddy_data:/data
+            - caddy_config:/config
+        depends_on:
+            - nao
+
 volumes:
     nao_postgres_data:
+    caddy_data:
+    caddy_config:
