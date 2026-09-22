@@ -99,7 +99,7 @@ function renderSuggestion({
 		return (
 			<SuggestionCard
 				icon={<Plug className='size-4 text-primary' />}
-				message={`Connect your account to "${mcpAuth.server}" to continue`}
+				message={`连接你的账户到 "${mcpAuth.server}" 以继续`}
 			>
 				<Button
 					variant='ghost'
@@ -107,7 +107,7 @@ function renderSuggestion({
 					className='rounded-full text-muted-foreground'
 					onClick={mcpAuth.dismiss}
 				>
-					Not now
+					暂不
 				</Button>
 				<Button
 					variant='primary-gradient'
@@ -116,7 +116,7 @@ function renderSuggestion({
 					onClick={mcpAuth.connect}
 					disabled={mcpAuth.connecting}
 				>
-					{mcpAuth.connecting ? 'Connecting…' : 'Connect'}
+					{mcpAuth.connecting ? '连接中…' : '连接'}
 				</Button>
 			</SuggestionCard>
 		);
@@ -126,7 +126,7 @@ function renderSuggestion({
 		return (
 			<SuggestionCard
 				icon={<StoryIcon className='size-5 text-primary' />}
-				message='Would you want to create a story?'
+				message='要创建一个故事吗？'
 			>
 				<Button
 					variant='ghost'
@@ -134,20 +134,20 @@ function renderSuggestion({
 					className='rounded-full text-muted-foreground'
 					onClick={story.neverPropose}
 				>
-					Do not propose again
+					不再提示
 				</Button>
 				<Button variant='ghost' size='sm' className='rounded-full' onClick={story.dismiss}>
-					No
+					否
 				</Button>
 				<Button variant='primary-gradient' size='sm' className='rounded-full' onClick={story.accept}>
-					Yes
+					是
 				</Button>
 			</SuggestionCard>
 		);
 	}
 
 	if (feedback.showThanks) {
-		return <SuggestionCard icon={<Check className='size-4 text-primary' />} message='Thanks for your feedback!' />;
+		return <SuggestionCard icon={<Check className='size-4 text-primary' />} message='感谢你的反馈！' />;
 	}
 
 	if (feedback.isVisible) {
@@ -155,7 +155,7 @@ function renderSuggestion({
 			<>
 				<SuggestionCard
 					icon={<MessageSquare className='size-4 text-muted-foreground' />}
-					message='How did this conversation go?'
+					message='这次对话怎么样？'
 				>
 					<Button
 						variant='ghost'
@@ -163,7 +163,7 @@ function renderSuggestion({
 						className='hover:rounded-full'
 						onClick={() => feedback.openFeedbackDialog('up')}
 						disabled={feedback.isPending}
-						aria-label='Good conversation'
+						aria-label='对话不错'
 					>
 						<ThumbsUp className='size-4' />
 					</Button>
@@ -173,7 +173,7 @@ function renderSuggestion({
 						className='hover:rounded-full'
 						onClick={() => feedback.openFeedbackDialog('down')}
 						disabled={feedback.isPending}
-						aria-label='Bad conversation'
+						aria-label='对话不佳'
 					>
 						<ThumbsDown className='size-4' />
 					</Button>
@@ -182,7 +182,7 @@ function renderSuggestion({
 						size='icon-sm'
 						className='hover:rounded-full text-muted-foreground'
 						onClick={feedback.dismiss}
-						aria-label='Dismiss'
+						aria-label='关闭'
 					>
 						<X className='size-4' />
 					</Button>
