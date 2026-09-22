@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { signIn } from '@/lib/auth-client';
 import { AuthForm, FormTextField } from '@/components/auth-form';
-import { useIsCloud } from '@/hooks/use-nao-mode';
 import { rememberSignInMethod } from '@/lib/last-sign-in-method';
 import { getSafeRedirectPath } from '@/lib/safe-redirect';
 import { trpc } from '@/main';
@@ -32,7 +31,6 @@ function Login() {
 	const [serverError, setServerError] = useState<string | undefined>(oauthError);
 	const isSmtpSetup = useQuery(trpc.authConfig.smtp.isSetup.queryOptions());
 	const config = useQuery(trpc.system.getPublicConfig.queryOptions());
-	const isCloud = useIsCloud();
 	const isUserLoginEnabled = config.data?.enableUserLogin;
 	const isUserSignupEnabled = config.data?.enableUserSignup;
 
@@ -73,7 +71,7 @@ function Login() {
 			displayEmailPasswordForm={isUserLoginEnabled}
 			emailPasswordDisabledMessage='邮箱密码登录已禁用，请使用已配置的登录方式继续。'
 			footer={
-				isCloud && isUserSignupEnabled ? (
+				isUserSignupEnabled ? (
 					<>
 						还没有账号？{' '}
 						<Link
