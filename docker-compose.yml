@@ -37,6 +37,7 @@ services:
             # Authentication & API Keys
             # =================================================================
             BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+            BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:5005}
             OPENAI_API_KEY: ${OPENAI_API_KEY}
             ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
 
