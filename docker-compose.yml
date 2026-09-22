@@ -4,6 +4,7 @@ services:
         container_name: nao_chat_postgres
         security_opt:
             - label:disable
+            - seccomp:unconfined
         env_file:
             - .env
         environment:
