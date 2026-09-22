@@ -1,3 +1,7 @@
+{
+	default_sni {$NAO_HOST}
+}
+
 https://{$NAO_HOST} {
 	tls internal
 	reverse_proxy nao:5005
