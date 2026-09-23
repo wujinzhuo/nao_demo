@@ -28,9 +28,9 @@ export function NewsletterSubscribeDialog({ open, onOpenChange }: NewsletterSubs
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Subscribe to the nao newsletter</DialogTitle>
+					<DialogTitle>订阅 nao 资讯</DialogTitle>
 					<DialogDescription>
-						Get product updates, release notes, and practical analytics agent tips in your inbox.
+						在收件箱获取产品更新、发布说明以及实用的分析代理技巧。
 					</DialogDescription>
 				</DialogHeader>
 				<NewsletterSubscribeForm />
@@ -63,10 +63,10 @@ function NewsletterSubscribeForm({ initialEmail = '', variant = 'dialog' }: News
 
 		try {
 			await subscribeToNewsletter(email);
-			setMessage("You're subscribed. Thanks for following nao.");
+			setMessage('订阅成功，感谢关注 nao。');
 		} catch (error) {
 			setHasError(true);
-			setMessage(error instanceof Error ? error.message : 'Could not subscribe right now.');
+			setMessage(error instanceof Error ? error.message : '暂时无法订阅。');
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -79,7 +79,7 @@ function NewsletterSubscribeForm({ initialEmail = '', variant = 'dialog' }: News
 				onSubmit={handleSubmit}
 			>
 				<label htmlFor={inputId} className='sr-only'>
-					Email address
+					邮箱地址
 				</label>
 				<Input
 					id={inputId}
@@ -97,7 +97,7 @@ function NewsletterSubscribeForm({ initialEmail = '', variant = 'dialog' }: News
 					size={isInline ? 'sm' : 'default'}
 					isLoading={isSubmitting}
 				>
-					Subscribe
+					订阅
 				</Button>
 			</form>
 			{message && (
@@ -121,6 +121,6 @@ async function subscribeToNewsletter(email: string) {
 	});
 
 	if (!response.ok) {
-		throw new Error('Could not subscribe right now.');
+		throw new Error('现在无法订阅，请稍后再试。');
 	}
 }

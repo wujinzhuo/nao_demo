@@ -47,17 +47,17 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 		if (isProjectDisabled) {
 			return {
 				toggle: isAdmin
-					? 'Turned off for the whole project.'
-					: 'An admin has turned memory off for this project.',
+					? '已对整个项目关闭。'
+					: '管理员已为此项目关闭记忆功能。',
 				empty: isAdmin
-					? 'Turn on project memory in Agent → Capabilities to see and use your saved memories.'
-					: 'Ask an admin to turn on project memory to see and use your saved memories.',
+					? '在 代理 → 能力 中开启项目记忆，即可查看和使用已保存的记忆。'
+					: '请联系管理员开启项目记忆，才能查看和使用已保存的记忆。',
 			};
 		}
 		if (isUserDisabled) {
 			return {
 				toggle: '',
-				empty: 'Turn on memory for yourself to see and use your saved memories.',
+				empty: '为自己开启记忆功能，即可查看和使用已保存的记忆。',
 			};
 		}
 		return null;
@@ -96,15 +96,15 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 
 	return (
 		<SettingsCard
-			title='Your memory'
-			description='What nao remembers about you. Only you can see and manage these.'
+			title='你的记忆'
+			description='nao 记住的关于你的信息。只有你可以查看和管理这些内容。'
 			divide
 		>
 			<SettingsControlRow
 				id='user-memory'
-				label='Enable memory for me'
+				label='为我开启记忆'
 				description={
-					isProjectDisabled ? memoryStatusMessage?.toggle : 'Allow nao to save and use memories about you.'
+					isProjectDisabled ? memoryStatusMessage?.toggle : '允许 nao 保存和使用关于你的记忆。'
 				}
 				control={
 					<Switch
@@ -126,7 +126,7 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 					<SettingsMemorySkeleton className='pb-0' />
 				</div>
 			) : !memories?.length ? (
-				<Empty>No memories saved yet.</Empty>
+				<Empty>暂无已保存的记忆。</Empty>
 			) : (
 				<div className='flex flex-col divide-y'>
 					{memories.map((memory) => (
@@ -144,7 +144,7 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 			<Dialog open={!!editMemory} onOpenChange={() => setEditMemory(null)}>
 				<DialogContent className='p-6' showCloseButton={false}>
 					<DialogHeader>
-						<DialogTitle>Edit memory</DialogTitle>
+						<DialogTitle>编辑记忆</DialogTitle>
 					</DialogHeader>
 					<div className='space-y-4'>
 						<Textarea
@@ -156,13 +156,13 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 					</div>
 					<DialogFooter>
 						<Button variant='ghost' onClick={() => setEditMemory(null)} disabled={updateMutation.isPending}>
-							Cancel
+							取消
 						</Button>
 						<Button
 							onClick={handleSaveEdit}
 							disabled={updateMutation.isPending || editContent.trim().length === 0}
 						>
-							Save
+							保存
 						</Button>
 					</DialogFooter>
 				</DialogContent>
@@ -171,15 +171,15 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 			<AlertDialog open={!!deleteMemory} onOpenChange={() => setDeleteMemory(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete memory?</AlertDialogTitle>
+						<AlertDialogTitle>删除这条记忆？</AlertDialogTitle>
 						<AlertDialogDescription>
-							This memory will be removed and forgotten by the agent.
+							这条记忆将被移除，代理将不再记得它。
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					{deleteMutation.error?.message && <ErrorMessage message={deleteMutation.error.message} />}
 					<AlertDialogFooter>
 						<AlertDialogCancel variant='outline' size='sm' disabled={deleteMutation.isPending}>
-							Cancel
+							取消
 						</AlertDialogCancel>
 						<AlertDialogAction
 							variant='destructive'
@@ -187,7 +187,7 @@ export function SettingsMemories({ isAdmin }: { isAdmin: boolean }) {
 							onClick={handleConfirmDelete}
 							disabled={deleteMutation.isPending}
 						>
-							Delete
+							删除
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

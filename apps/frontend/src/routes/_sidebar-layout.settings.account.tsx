@@ -76,8 +76,8 @@ function GeneralPage() {
 		<SettingsPageWrapper>
 			<div className='flex flex-col gap-5'>
 				<div>
-					<h1 className='text-lg font-semibold text-foreground'>Account</h1>
-					<p className='text-sm text-muted-foreground'>Manage your account and session.</p>
+					<h1 className='text-lg font-semibold text-foreground'>账户</h1>
+					<p className='text-sm text-muted-foreground'>管理你的账户和会话。</p>
 				</div>
 				<div className='flex flex-col gap-12'>
 					<UserProfileCard
@@ -95,29 +95,29 @@ function GeneralPage() {
 						onSubmit={handleEdit}
 					/>
 
-					<SettingsCard title='General Settings' divide>
+					<SettingsCard title='通用设置' divide>
 						<SettingsToggleRow
 							id='sound-notification'
-							label='Sound notification'
-							description='Play a sound when the agent finishes responding.'
+							label='声音提示'
+							description='代理回复完成时播放提示音。'
 							checked={soundEnabled}
 							onCheckedChange={setSoundEnabled}
 						/>
 						<SettingsControlRow
-							label='Tool Call Density'
-							description='Adjust how much detail is shown for tool calls.'
+							label='工具调用详细程度'
+							description='调整工具调用显示的详细程度。'
 							control={
 								<ToolCallDensitySlider value={toolCallDensity} onValueChange={setToolCallDensity} />
 							}
 						/>
 						<SettingsControlRow
-							label='Theme'
-							description='Choose how nao looks.'
+							label='主题'
+							description='选择 nao 的外观。'
 							control={<ThemeSelector />}
 						/>
 						<SettingsControlRow
-							label='Newsletter'
-							description='Get product updates, release notes, and analytics agent tips.'
+							label='订阅资讯'
+							description='获取产品更新、发布说明和数据分析代理使用技巧。'
 							control={<NewsletterSubscribeInlineForm initialEmail={user?.email} />}
 						/>
 					</SettingsCard>

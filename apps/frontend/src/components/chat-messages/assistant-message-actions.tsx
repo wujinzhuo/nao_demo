@@ -158,11 +158,11 @@ export function FeedbackDialog({ open, onOpenChange, onSubmit, isPending, vote }
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogContent showCloseButton>
 				<DialogHeader>
-					<DialogTitle>{isPositive ? 'What went well?' : 'What went wrong?'}</DialogTitle>
+					<DialogTitle>{isPositive ? '哪里做得好？' : '哪里出了问题？'}</DialogTitle>
 					<DialogDescription className='text-sm text-muted-foreground font-medium'>
 						{isPositive
-							? 'Help us improve by explaining what worked well with this response.'
-							: 'Help us improve by explaining what was wrong with this response.'}
+							? '说说这次回答哪里让你满意，帮助我们做得更好。'
+							: '说说这次回答哪里有问题，帮助我们做得更好。'}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -170,8 +170,8 @@ export function FeedbackDialog({ open, onOpenChange, onSubmit, isPending, vote }
 					<Textarea
 						placeholder={
 							isPositive
-								? 'Tell us what worked well (optional)'
-								: 'Tell us what could be better (optional)'
+								? '告诉我们哪里做得好（选填）'
+								: '告诉我们哪里可以改进（选填）'
 						}
 						value={explanation}
 						onKeyDown={handleKeyDown}
@@ -181,7 +181,7 @@ export function FeedbackDialog({ open, onOpenChange, onSubmit, isPending, vote }
 					/>
 
 					<Button variant='primary-gradient' className='rounded-full' type='submit' disabled={isPending}>
-						Submit
+						提交
 					</Button>
 				</form>
 			</DialogContent>

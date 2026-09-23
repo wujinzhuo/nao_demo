@@ -31,16 +31,16 @@ export function DangerZone() {
 
 	return (
 		<>
-			<SettingsCard title='Danger Zone'>
+			<SettingsCard title='危险区域'>
 				<div className='flex items-center justify-between gap-4'>
 					<div className='space-y-0.5'>
-						<p className='text-sm font-medium'>Delete all chats</p>
+						<p className='text-sm font-medium'>删除所有对话</p>
 						<p className='text-xs text-muted-foreground'>
-							Permanently delete all your non-starred conversations. Starred chats will be kept.
+							永久删除所有未收藏的对话。已收藏的对话会保留。
 						</p>
 					</div>
 					<Button variant='destructive' size='sm' onClick={() => setIsOpen(true)}>
-						Delete all
+						全部删除
 					</Button>
 				</div>
 			</SettingsCard>
@@ -48,14 +48,13 @@ export function DangerZone() {
 			<AlertDialog open={isOpen} onOpenChange={setIsOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete all non-starred chats?</AlertDialogTitle>
+						<AlertDialogTitle>删除所有未收藏的对话？</AlertDialogTitle>
 						<AlertDialogDescription>
-							This will permanently delete all your conversations that are not starred. This action cannot
-							be undone.
+							这将永久删除你所有未收藏的对话。此操作无法撤销。
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogCancel>取消</AlertDialogCancel>
 						<AlertDialogAction
 							variant='destructive'
 							isLoading={deleteAllNonStarred.isPending}
@@ -64,7 +63,7 @@ export function DangerZone() {
 								deleteAllNonStarred.mutate();
 							}}
 						>
-							Delete all
+							全部删除
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

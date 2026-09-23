@@ -1,10 +1,9 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, useId } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Plus, PencilRuler, Database, Paperclip, AlertTriangle, Shield, Check } from 'lucide-react';
 import { ATTACHMENT_ACCEPT } from '@nao/shared/attachments';
-import { Button, ChatButton, MicButton } from './ui/button';
-import { SlidingWaveform } from './chat-input-sliding-waveform';
+import { Button, ChatButton } from './ui/button';
 import { ChatPrompt, STORY_MENTION_ID, DATABASE_MENTION_TRIGGER } from './chat-input-prompt';
 import { ChatInputModelSelect } from './chat-input-model-select';
 import { ChatInputMessageQueue } from './chat-input-message-queue';
@@ -27,7 +26,6 @@ import { InputGroup, InputGroupAddon } from '@/components/ui/input-group';
 import { trpc } from '@/main';
 import { useAgentContext, useAgentMessagesSelector } from '@/contexts/agent.provider';
 import { useRegisterSetChatInputCallback } from '@/contexts/set-chat-input-callback';
-import { useTranscribe } from '@/hooks/use-transcribe';
 import { useAttachmentUpload } from '@/hooks/use-attachment-upload';
 import { parseBudgetError } from '@/lib/ai';
 import { cn } from '@/lib/utils';
@@ -139,12 +137,6 @@ function ChatInputBase({
 	const chatInputRestore = useChatInputRestore(!!allowQueueing);
 	const effectivePlaceholder = isRunning && allowQueueing ? 'Add a follow-up...' : placeholder;
 
-	const agentSettings = useQuery(trpc.project.getAgentSettings.queryOptions());
-	const transcribeModels = useQuery(trpc.project.getKnownTranscribeModels.queryOptions());
-	const isTranscribeEnabled = agentSettings.data?.transcribe?.enabled ?? false;
-	const hasTranscribeProvider = Object.values(transcribeModels.data ?? {}).some((p) => p.hasKey);
-	const isTranscribeReady = isTranscribeEnabled && hasTranscribeProvider;
-
 	const budgetStatus = useQuery({
 		...trpc.budget.checkBudgetStatus.queryOptions({ provider: selectedModel?.provider ?? 'openai' }),
 		enabled: !!selectedModel?.provider,
@@ -152,8 +144,6 @@ function ChatInputBase({
 	});
 	const isBudgetExceeded = !!parseBudgetError(error) || budgetStatus.data?.level === 'exceeded';
 
-	const [micWarning, setMicWarning] = useState(false);
-	const micWarningTimer = useRef(0);
 	const dropZoneRef = useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = useState(false);
 
@@ -246,12 +236,6 @@ function ChatInputBase({
 		return () => document.removeEventListener('paste', handler);
 	}, [attachmentUpload.handlePaste]); // eslint-disable-line
 
-	const showMicWarning = useCallback(() => {
-		setMicWarning(true);
-		window.clearTimeout(micWarningTimer.current);
-		micWarningTimer.current = window.setTimeout(() => setMicWarning(false), 5000);
-	}, []);
-
 	const runGuardedAgentSend = useCallback(
 		(send: () => Promise<void>) =>
 			runWithStoryBeforeAgentSend({
@@ -329,14 +313,6 @@ function ChatInputBase({
 			submitQueuedMessageWithGuard,
 		],
 	);
-
-	const {
-		state: transcribeState,
-		toggle: toggleRecording,
-		isRecording,
-		isTranscribing,
-		analyserRef,
-	} = useTranscribe({ onTranscribed: submitMessage });
 
 	useEffect(() => {
 		if (typeof initialText !== 'string') {
@@ -430,9 +406,7 @@ function ChatInputBase({
 					/>
 
 					<InputGroupAddon align='block-end'>
-						{(!isTranscribeReady || (!isRecording && !isTranscribing)) && <ChatInputModelSelect />}
-
-						{isTranscribeReady && isRecording && <SlidingWaveform analyserRef={analyserRef} />}
+						<ChatInputModelSelect />
 
 						<div className='flex items-center gap-1.5 md:gap-2 ml-auto relative'>
 							<ChatInputPlusMenu
@@ -461,14 +435,6 @@ function ChatInputBase({
 							)}
 
 							<ContextWindowRing />
-
-							{isTranscribeReady && isRecording && <RecordingTimer />}
-							<MicButton
-								state={isTranscribeReady ? transcribeState : 'idle'}
-								onClick={isTranscribeReady ? toggleRecording : showMicWarning}
-								disabled={isRunning && !allowQueueing}
-							/>
-							{micWarning && <MicWarningBanner onDismiss={() => setMicWarning(false)} />}
 
 							{allowQueueing && isRunning ? (
 								<ChatButton
@@ -726,47 +692,5 @@ function ChatInputPlusMenu({
 				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
-	);
-}
-
-function RecordingTimer() {
-	const [elapsed, setElapsed] = useState(0);
-
-	useEffect(() => {
-		const id = setInterval(() => setElapsed((s) => s + 1), 1000);
-		return () => clearInterval(id);
-	}, []);
-
-	const mins = Math.floor(elapsed / 60);
-	const secs = elapsed % 60;
-
-	return (
-		<span className='text-xs tabular-nums text-muted-foreground'>
-			{mins}:{secs.toString().padStart(2, '0')}
-		</span>
-	);
-}
-
-function MicWarningBanner({ onDismiss }: { onDismiss: () => void }) {
-	return (
-		<div className='absolute bottom-full right-0 mb-2 w-64 rounded-md border bg-popover p-3 text-popover-foreground shadow-md animate-in fade-in slide-in-from-bottom-2 duration-200'>
-			<button
-				type='button'
-				onClick={onDismiss}
-				className='absolute top-1 right-1.5 text-muted-foreground hover:text-foreground text-xs cursor-pointer'
-			>
-				&times;
-			</button>
-			<p className='text-sm'>
-				Voice input is not configured.{' '}
-				<Link
-					to='/settings/project/models'
-					className='font-medium text-primary underline underline-offset-2 hover:text-primary/80'
-				>
-					Go to Settings &rarr; Models
-				</Link>{' '}
-				to enable transcription and set up a provider. Ask your admin.
-			</p>
-		</div>
 	);
 }

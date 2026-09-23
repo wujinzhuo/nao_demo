@@ -24,11 +24,11 @@ export function UserProfileCard({ name, email, onEdit, onSignOut }: UserProfileC
 			<div className='flex flex-row gap-2'>
 				<Button variant='secondary' size='sm' onClick={onEdit}>
 					<Pen />
-					Edit
+					编辑
 				</Button>
 				<Button variant='destructive-soft' size='sm' onClick={onSignOut}>
 					<LogOut />
-					Sign out
+					退出登录
 				</Button>
 			</div>
 		</SettingsCard>
