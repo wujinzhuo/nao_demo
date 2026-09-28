@@ -3,7 +3,7 @@
     "bi-sales": {
       "type": "http",
       "transport": "streamable-http",
-      "url": "http://bi-sales-mcp:8002/mcp"
+      "url": "http://bi-sales-mcp:8000/mcp"
     }
   }
 }
