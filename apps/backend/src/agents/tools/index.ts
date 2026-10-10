@@ -12,7 +12,7 @@ import { AgentSettings } from '../../types/agent-settings';
 import clarification from './clarification';
 import displayChart from './display-chart';
 import { createDisplayMapTool } from './display-map';
-import executePython from './execute-python';
+import executePython, { createExecutePythonTool } from './execute-python';
 import executeSandboxedCode from './execute-sandboxed-code';
 import executeSemanticQuery from './execute-semantic-query';
 import executeSql, { localOnlyExecuteSql } from './execute-sql';
@@ -121,7 +121,12 @@ export const getTools = (
 		...baseTools,
 		...(!options.testMode && { clarification: clarificationTool }),
 		...mcpTools,
-		...(agentSettings?.experimental?.pythonSandboxing && execute_python && { execute_python }),
+		...(agentSettings?.experimental?.pythonSandboxing &&
+			execute_python && {
+				execute_python: includeMcp
+					? createExecutePythonTool({ allowedMcpServers: options.mcpServers ?? null, mcpEnabled: true })!
+					: execute_python,
+			}),
 		...(agentSettings?.experimental?.sandboxes && execute_sandboxed_code && { execute_sandboxed_code }),
 		...(agentSettings?.mapEnabled !== false && {
 			display_map: createDisplayMapTool(options.customBoundaries ?? []),

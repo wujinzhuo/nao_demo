@@ -28,8 +28,11 @@ import {
 } from '../types/chat';
 import { applyChatFilters, buildChatGroups, type EnrichedChat, type SourcePlatform } from '../utils/chat-list';
 import { convertDBPartToUIPart, mapUIPartsToDBParts } from '../utils/chat-message-part-mappings';
+import { extractTabularResult } from '../utils/mcp-tabular-result';
 import { getErrorMessage } from '../utils/utils';
+import { getPythonSavedResultInChat } from './execute-python.queries';
 import * as executeSqlQueries from './execute-sql.queries';
+import { getMcpCallOutputByQueryIdInChat } from './mcp-call.queries';
 
 const chatCreatedAtMs =
 	dbConfig.dialect === Dialect.Postgres
@@ -1008,7 +1011,16 @@ export const getQueryResultByQueryId = async (
 	queryId: string,
 ): Promise<{ columns: string[]; data: Record<string, unknown>[] } | null> => {
 	const part = await executeSqlQueries.getExecuteSqlPartByQueryIdInChat(chatId, queryId);
-	return part ? extractQueryResultFromToolOutput(part.toolOutput) : null;
+	if (part) {
+		return extractQueryResultFromToolOutput(part.toolOutput);
+	}
+
+	const mcpOutput = await getMcpCallOutputByQueryIdInChat(chatId, queryId);
+	if (mcpOutput) {
+		return extractTabularResult(mcpOutput);
+	}
+
+	return getPythonSavedResultInChat(chatId, queryId);
 };
 
 export const getQueryResultByQueryIdInProject = async (

@@ -9,7 +9,7 @@ import { QueryIdSchema } from './query-id';
  */
 export const LOCAL_DATABASE_ID = 'duckdb_local';
 
-export const SAVE_FORMATS = ['csv', 'parquet'] as const;
+export const SAVE_FORMATS = ['csv', 'parquet', 'xlsx'] as const;
 
 export const SaveToSchema = z.object({
 	path: z
@@ -20,7 +20,7 @@ export const SaveToSchema = z.object({
 	format: z
 		.enum(SAVE_FORMATS)
 		.describe(
-			'parquet keeps column types and is the better choice for a result you will query again; csv is for a file someone opens.',
+			'parquet keeps column types and is the better choice for a result you will query again; csv is for a file someone opens; xlsx is for a spreadsheet the user asked for.',
 		),
 });
 

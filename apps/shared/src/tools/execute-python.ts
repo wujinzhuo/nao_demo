@@ -70,8 +70,15 @@ export const inputSchema = z.object({
 		.describe('Optional dictionary of input variables available to the code.'),
 });
 
+export const savedResultSchema = z.object({
+	columns: z.array(z.string()),
+	data: z.array(z.record(z.string(), z.unknown())),
+});
+
 export const outputSchema = z.object({
 	output: z.any().describe('The return value of the last expression in the code.'),
+	/** Rows the code kept with save_query_result, by query id. Persisted so later turns can reach them. */
+	saved_results: z.record(z.string(), savedResultSchema).optional(),
 });
 
 export type Input = z.infer<typeof inputSchema>;

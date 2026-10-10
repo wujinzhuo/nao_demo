@@ -1,7 +1,11 @@
 import { mcpCall } from '@nao/shared/tools';
 
+import { McpTableOutput, renderToModelOutput } from '../../components/tool-outputs';
+import { MCP_QUERY_HANDLE_KEY } from '../../queries/mcp-call.queries';
 import { McpArgsValidationError, mcpService } from '../../services/mcp';
 import { McpAuthRequiredError } from '../../services/mcp-oauth';
+import type { ToolContext } from '../../types/tools';
+import { extractTabularResult, extractTextContent, textAroundMarkdownTable } from '../../utils/mcp-tabular-result';
 import { createTool } from '../../utils/tools';
 
 const DESCRIPTION = [
@@ -19,6 +23,11 @@ const DESCRIPTION = [
 	'Some servers require the user to connect their account first. If a call returns an AUTH_REQUIRED',
 	'result, stop and ask the user to connect — a Connect button is shown to them automatically.',
 	'An empty server folder means its tools are not discovered yet: run `mcp_connect` on that server.',
+	'',
+	'When a tool returns a table, its rows are kept server-side under a query id and only a preview is',
+	'shown, starting with a "Query ID: query_…" line. Reuse that id (execute_sql on the local database,',
+	'read_query_result, data_files) instead of copying rows into another tool call. A result without that',
+	'line was not recognised as a table and has no id: never invent one.',
 ].join('\n');
 
 type McpContentBlock = { type: string; text?: string };
@@ -61,6 +70,45 @@ export const isAuthRequired = (output: unknown): output is McpAuthRequiredOutput
 const isValidationError = (output: unknown): output is McpValidationErrorOutput =>
 	!!output && typeof output === 'object' && (output as McpValidationErrorOutput).mcpValidationError === true;
 
+/** Recorded on an MCP output whose table was kept under a query id. */
+export interface McpQueryHandle {
+	id: `query_${string}`;
+	row_count: number;
+	columns: string[];
+}
+
+/**
+ * Keeps a tabular MCP result in the run's query results so later tools reach the rows by id.
+ * The raw output is persisted untouched apart from the handle, which is how later turns find it.
+ */
+const keepTabularResult = (output: unknown, context: ToolContext): unknown => {
+	const table = extractTabularResult(output);
+	if (!table) {
+		return output;
+	}
+
+	const id = `query_${crypto.randomUUID().slice(0, 8)}` as const;
+	context.queryResults.set(id, table);
+
+	const handle: McpQueryHandle = { id, row_count: table.data.length, columns: table.columns };
+	return { ...(output as Record<string, unknown>), [MCP_QUERY_HANDLE_KEY]: handle };
+};
+
+const readQueryHandle = (output: unknown): McpQueryHandle | null => {
+	const handle = (output as Record<string, unknown> | null)?.[MCP_QUERY_HANDLE_KEY] as McpQueryHandle | undefined;
+	return typeof handle?.id === 'string' ? handle : null;
+};
+
+const toModelOutput = (output: unknown) => {
+	const handle = readQueryHandle(output);
+	const table = handle ? extractTabularResult(output) : null;
+	if (handle && table) {
+		const note = textAroundMarkdownTable(extractTextContent(output));
+		return renderToModelOutput(McpTableOutput({ queryId: handle.id, table, note }), output);
+	}
+	return { type: 'text' as const, value: extractText(output) };
+};
+
 const extractText = (output: unknown): string => {
 	if (isAuthRequired(output)) {
 		return authRequiredText(output.server);
@@ -99,7 +147,7 @@ export const createMcpCallTool = (allowedServers: string[] | null) =>
 		inputSchema: mcpCall.InputSchema,
 		execute: async ({ server, tool, arguments: args }, context) => {
 			try {
-				return await mcpService.callTool({
+				const output = await mcpService.callTool({
 					projectId: context.projectId,
 					userId: context.userId,
 					server,
@@ -107,6 +155,7 @@ export const createMcpCallTool = (allowedServers: string[] | null) =>
 					args: args ?? {},
 					allowedServers,
 				});
+				return keepTabularResult(output, context);
 			} catch (error) {
 				if (error instanceof McpAuthRequiredError) {
 					return authRequiredOutput(error.server);
@@ -122,5 +171,5 @@ export const createMcpCallTool = (allowedServers: string[] | null) =>
 				throw error;
 			}
 		},
-		toModelOutput: ({ output }) => ({ type: 'text', value: extractText(output) }),
+		toModelOutput: ({ output }) => toModelOutput(output),
 	});

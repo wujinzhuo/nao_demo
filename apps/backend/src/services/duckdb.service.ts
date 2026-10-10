@@ -103,8 +103,14 @@ async function runAndWriteOut(
 
 const SAVED_RESULT_TABLE = 'nao_saved_result';
 
+const COPY_OPTIONS: Record<SaveFormat, string> = {
+	csv: 'FORMAT csv, HEADER',
+	parquet: 'FORMAT parquet',
+	xlsx: 'FORMAT xlsx, HEADER true',
+};
+
 function copyOptions(format: SaveFormat): string {
-	return format === 'csv' ? 'FORMAT csv, HEADER' : 'FORMAT parquet';
+	return COPY_OPTIONS[format];
 }
 
 /** A trailing semicolon is harmless on its own but closes the statement this gets wrapped in. */
@@ -150,9 +156,9 @@ async function loadSpreadsheetSupport(connection: DuckDBConnection): Promise<Err
 function explainLocalQueryFailure(error: unknown, spreadsheetSupport: Error | null): Error {
 	const message = error instanceof Error ? error.message : String(error);
 
-	if (spreadsheetSupport && /read_xlsx|\bexcel\b/i.test(message)) {
+	if (spreadsheetSupport && /read_xlsx|\bxlsx\b|\bexcel\b/i.test(message)) {
 		return new Error(
-			`Reading spreadsheets needs DuckDB's excel extension, which is not available here (${spreadsheetSupport.message}). Convert the file to CSV, or read it in a sandbox with pandas instead.`,
+			`Spreadsheets need DuckDB's excel extension, which is not available here (${spreadsheetSupport.message}). Use CSV instead, or work with the file in a sandbox with pandas.`,
 			{ cause: error },
 		);
 	}

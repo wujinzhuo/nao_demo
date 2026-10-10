@@ -112,10 +112,10 @@ export function SystemPrompt({
 					conversation fillers. Jump straight to providing value.
 				</ListItem>
 				<ListItem>
-					<Bold>Language</Bold>: Always match the language of the user's message in everything you
-					write — your reasoning and thinking, your final answer, and any short summaries. If the user
-					writes in Chinese, both your thinking and your answer must be in Chinese; if in English, use
-					English. Never translate SQL, code, column or table identifiers, or tool arguments.
+					<Bold>Language</Bold>: Always match the language of the user's message in everything you write —
+					your reasoning and thinking, your final answer, and any short summaries. If the user writes in
+					Chinese, both your thinking and your answer must be in Chinese; if in English, use English. Never
+					translate SQL, code, column or table identifiers, or tool arguments.
 				</ListItem>
 			</List>
 			<Title level={2}>Tool Calls</Title>
@@ -329,7 +329,9 @@ export function SystemPrompt({
 
 				{customCharts.length > 0 && <CustomChartsBlock charts={customCharts} />}
 
-				{mcpServers.length > 0 && <McpServersBlock servers={mcpServers} />}
+				{mcpServers.length > 0 && (
+					<McpServersBlock servers={mcpServers} canRunPython={!!toolNames?.includes('execute_python')} />
+				)}
 
 				{visibleMemories.length > 0 && <MemoryBlock memories={visibleMemories} />}
 			</Block>
@@ -527,8 +529,9 @@ function LocalDatabaseBlock({
 					<Span>
 						<Bold>save_to</Bold> keeps the result as a file as well as returning it. Pass a{' '}
 						<Bold>/home</Bold> path and a format: <Bold>parquet</Bold> for a step you intend to query again,
-						because it keeps the column types, and <Bold>csv</Bold> for something the user will open. The
-						extension has to match the format.
+						because it keeps the column types, <Bold>csv</Bold> for something the user will open, and{' '}
+						<Bold>xlsx</Bold> when they asked for an Excel spreadsheet. The extension has to match the
+						format.
 					</Span>
 					<CodeBlock>
 						{`save_to: { path: "/home/exports/revenue-by-region.parquet", format: "parquet" }`}
@@ -657,7 +660,7 @@ function truncateChartDescription(description: string): string {
 		: `${description.slice(0, MAX_CHART_DESCRIPTION_LENGTH - 1).trimEnd()}…`;
 }
 
-function McpServersBlock({ servers }: { servers: string[] }) {
+function McpServersBlock({ servers, canRunPython }: { servers: string[]; canRunPython: boolean }) {
 	return (
 		<Block>
 			<Title level={2}>MCP Servers</Title>
@@ -677,6 +680,19 @@ function McpServersBlock({ servers }: { servers: string[] }) {
 				An empty or missing server folder means its tools have not been discovered yet, not that the server has
 				none. Call <Bold>mcp_connect</Bold> with that server to discover them, then continue — never tell the
 				user the server exposes no tool without trying it.
+				<Br />
+				When a tool returns a table, its rows are kept server-side under a query id and only a preview reaches
+				you. Reuse that id (execute_sql on <Bold>{LOCAL_DATABASE_ID}</Bold>, read_query_result, save_to) instead
+				of copying rows into another tool call.
+				{canRunPython && (
+					<>
+						<Br />
+						When MCP rows need processing, prefer <Bold>execute_python</Bold> over mcp_call: call{' '}
+						<Bold>mcp_call(server, tool, arguments)</Bold> from the code, transform the rows there, and
+						return only a summary, or keep the rows with <Bold>save_query_result(rows)</Bold> and use the
+						returned query id afterwards. The rows never enter your context.
+					</>
+				)}
 			</Span>
 			<List>
 				{servers.map((server) => (

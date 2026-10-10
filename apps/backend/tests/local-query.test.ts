@@ -236,6 +236,19 @@ describe('saving the result', () => {
 		});
 	});
 
+	it('writes an xlsx spreadsheet the next query can read straight back', async () => {
+		const { savedFile } = await runOutcome('SELECT * FROM query_ff00', {
+			queryResults: [['query_ff00', { columns: ['region', 'amount'], data: [{ region: 'EU', amount: 10 }] }]],
+			saveTo: { path: '/home/exports/shipments.xlsx', format: 'xlsx' },
+		});
+
+		expect(savedFile?.path).toBe('/home/exports/shipments.xlsx');
+		expect(await run("SELECT region, amount FROM read_xlsx('/home/exports/shipments.xlsx')")).toEqual({
+			columns: ['region', 'amount'],
+			data: [{ region: 'EU', amount: 10 }],
+		});
+	});
+
 	it('tolerates a trailing semicolon', async () => {
 		const { savedFile } = await runOutcome('SELECT 1 AS n;', {
 			saveTo: { path: '/home/n.csv', format: 'csv' },

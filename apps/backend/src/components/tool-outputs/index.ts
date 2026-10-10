@@ -9,6 +9,7 @@ export { ExecuteSemanticQueryOutput } from './execute-semantic-query';
 export { ExecuteSqlOutput } from './execute-sql';
 export { GrepOutput } from './grep';
 export { ListOutput } from './list';
+export { McpTableOutput } from './mcp-table';
 export { ReadOutput } from './read';
 export { ReadQueryResultOutput } from './read-query-result';
 export { SearchOutput } from './search';
