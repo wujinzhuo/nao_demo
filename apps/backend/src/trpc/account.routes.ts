@@ -80,7 +80,7 @@ export const accountRoutes = {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
 					message:
-						'New password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
+						'New password must be at least 8 characters long.',
 				});
 			}
 

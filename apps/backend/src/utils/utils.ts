@@ -174,7 +174,7 @@ export function resolveProviderId(ctx?: { params?: Record<string, string | undef
 	return ctx?.params?.id ?? ctx?.params?.providerId;
 }
 
-export const regexPassword = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+export const regexPassword = /^.{8,}$/;
 
 export const replaceEnvVars = (fileContent: string, extraEnv: Record<string, string> = {}) => {
 	const replaced = fileContent.replace(/\$\{(\w+)\}/g, (match, varName) => {
